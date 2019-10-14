@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Sudheer Tangellapelly">
+    <title>Tolls and Routes</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+
+        body {
+            font-size: .875rem;
+        }
+
+        .feather {
+            width: 16px;
+            height: 16px;
+            vertical-align: text-bottom;
+        }
+
+        /*
+ * Sidebar
+ */
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            /* Behind the navbar */
+            padding: 48px 0 0;
+            /* Height of navbar */
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+        }
+
+        .sidebar-sticky {
+            position: relative;
+            top: 0;
+            height: calc(100vh - 48px);
+            padding-top: .5rem;
+            overflow-x: hidden;
+            overflow-y: auto;
+            /* Scrollable contents if viewport is shorter than content. */
+        }
+
+        @supports ((position: -webkit-sticky) or (position: sticky)) {
+            .sidebar-sticky {
+                position: -webkit-sticky;
+                position: sticky;
+            }
+        }
+
+        .sidebar .nav-link {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .sidebar .nav-link .feather {
+            margin-right: 4px;
+            color: #999;
+        }
+
+        .sidebar .nav-link.active {
+            color: #007bff;
+        }
+
+        .sidebar .nav-link:hover .feather,
+        .sidebar .nav-link.active .feather {
+            color: inherit;
+        }
+
+        .sidebar-heading {
+            font-size: .75rem;
+            text-transform: uppercase;
+        }
+
+        /*
+ * Content
+ */
+
+        [role="main"] {
+            padding-top: 133px;
+            /* Space for fixed navbar */
+        }
+
+        @media (min-width: 768px) {
+            [role="main"] {
+                padding-top: 48px;
+                /* Space for fixed navbar */
+            }
+        }
+
+        /*
+ * Navbar
+ */
+
+        .navbar-brand {
+            padding-top: .75rem;
+            padding-bottom: .75rem;
+            font-size: 1rem;
+            background-color: rgba(0, 0, 0, .25);
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
+        }
+
+        .navbar .form-control {
+            padding: .75rem 1rem;
+            border-width: 0;
+            border-radius: 0;
+        }
+
+        .form-control-dark {
+            color: #fff;
+            background-color: rgba(255, 255, 255, .1);
+            border-color: rgba(255, 255, 255, .1);
+        }
+
+        .form-control-dark:focus {
+            border-color: transparent;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
+        }
+    </style>
+    <script>
+    var app_id = "MMRyT9PioGx6DeImyPie",
+		app_code = "SB7YD1dqPH40vz-lSJE19g",
+		app_id_cors = "BTp1kLd1IpptcQe2Ir3h",
+		app_code_cors = "zMDPaKTAFR2g3wF3h4ok7w",
+		api_key = "43ZNwPKXbl1IXT3H4qSdaSs0xAw_M76NaT_7bmlju98";
+    </script>
+    <script type="text/javascript" charset="UTF-8" src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="https://js.api.here.com/v3/3.1/mapsjs-clustering.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="https://js.api.here.com/v3/3.1/mapsjs-data.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css" />
+    <script
+		src="https://tcs.ext.here.com/assets/application-c292081b4b1620b3a8c834ab559705c7d69a2948c7fcf5d380bdd66b44c8e139.js"
+		data-turbolinks-track="true"></script>
+    <style>
+        #mapContainer {
+            height: 100vh;
+            left: 0;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            background: rgb(88, 88, 88);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+                <div class="ctrl-panel">
+                    <h4>Route Options</h4>
+                    <hr>
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label class="control-label col-sm-3" for="start">Source:</label>
+                            <div class="col-sm-9">
+                                <input type='text' id='start' class='form-control ' value='denver'
+                                    onkeydown="if (event.keyCode == 13)startRouteCalculation();">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3" for="dest">Destination:</label>
+                            <div class="col-sm-9">
+                                <input type='text' id='dest' class='form-control' size='40' value='new york'
+                                    onkeydown="if (event.keyCode == 13)startRouteCalculation();" />
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                    
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label class="control-label col-sm-3" for="dest">Currency:</label>
+                            <div class="col-sm-9">
+                                <input type='text' id='currency' class="form-control" value='USD'
+                                    onkeydown="if (event.keyCode == 13)startRouteCalculation();" /></td>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <table border="0" class="form-group">
+                        <tr style="display: none">
+                            <td style="font-weight: bold;">Route Alternatives:</td>
+                            <td colspan="3">
+                                <select id="routeAlternatives" class="form-control" style="width:312px;"
+                                    onkeydown="if (event.keyCode == 13)startRouteCalculation();">
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2" selected="true">2</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">Vehicle Type:</td>
+                            <td colspan="3">
+                                <select id="predefinedVehSpec" class="form-control" style="width:312px;"
+                                    onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+                                    onchange="handleVehicleSpecChanged()">
+                                    <option value="0" selected="true">Car</option>
+                                    <option value="1">Delivery Truck</option>
+                                    <option value="2">Truck (7.5t)</option>
+                                    <option value="3">Truck (11t)</option>
+                                    <option value="4">Truck with one trailer (38t)</option>
+                                    <option value="5">Trailer Truck (40t)</option>
+                                    <option value="6">Car with Trailer</option>
+                                    <!--option value="7">Bus</option>
+					<option value="8">Motor Home</option-->
+                                    <option value="99" disabled style="display:none;">User defined</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <table border="0" class="form-group">
+                        <tr>
+                            <td><input type="submit" id="routeButton2" class="btn btn-default btn-sm" value="submit" />
+                            </td>
+                        </tr>
+                    </table>
+                    <table border="0">
+                        <tr style="display: none;">
+                            <td>Server URL</td>
+                            <td><input type='text' hidden id='serverURL' class="form-control" style="width:230px;"
+                                    value='https://tce.cit.api.here.com'
+                                    onkeydown="if (event.keyCode == 13)startRouteCalculation();" /></td>
+                        </tr>
+                    </table>
+                    <div id="feedbackTxt" class="form-group"></div>
+                    <div id="releaseInfoTxt" style="left:0; top:0; z-index: 0;" value="Used Service Releases:/n"></div>
+                </div>
+            </nav>
+
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+                <div
+                    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+
+                </div>
+
+                <div id="mapContainer" class="container-fluid"></div>
+
+
+            </main>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
+    
+        <script src="mainHome.js" type="text/javascript"></script>
+</html>

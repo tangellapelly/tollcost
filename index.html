@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Route with Toll Cost</title>
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<script>
+	</script>
+	<script type="text/javascript" charset="UTF-8" src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
+	<script type="text/javascript" charset="UTF-8" src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
+	<script type="text/javascript" charset="UTF-8" src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
+	<script type="text/javascript" charset="UTF-8" src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script>
+	<script type="text/javascript" charset="UTF-8" src="https://js.api.here.com/v3/3.1/mapsjs-clustering.js"></script>
+	<script type="text/javascript" charset="UTF-8" src="https://js.api.here.com/v3/3.1/mapsjs-data.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css" />
+
+
+	<link rel="shortcut icon" type="image/x-icon"
+		href="https://tcs.ext.here.com/assets/favicon-b11b589c436fb4354ff7ae08b125a27ad29e211ead5de1ab480114e3b8951a16.ico" />
+
+
+	<script
+		src="https://tcs.ext.here.com/assets/application-c292081b4b1620b3a8c834ab559705c7d69a2948c7fcf5d380bdd66b44c8e139.js"
+		data-turbolinks-track="true"></script>
+	<style>
+.H_ib_content{
+	min-width: 15em;
+    margin: 11px 4px 4px 5px;
+
+}
+#infoBox {
+            top:10px;
+            z-index: 15;
+            right: 10px;
+            position: absolute;
+        }
+		
+.container-fluid { padding: 0;overflow: none;}
+		#mapContainer {
+			height: 100vh;
+			left: 0;
+			position: absolute;
+			width: 100vw;
+			/* top: 5px; */
+			background: rgb(88, 88, 88);
+			
+		}
+.col-sm-9{
+	max-width: 100%;
+}
+.form-group {
+    margin-bottom: 0.5rem;
+}
+		.ctrl-panel {
+			/* box-shadow: 6px 8px #888888; */
+			background-color: #ffffff;
+			border-right: solid #ffffff 1px;
+			border-bottom: solid #ffffff 1px;
+			/*border-radius: 10px 10px 0px 0px;*/
+			left: 30px;
+			width: 374px;
+			max-height: calc(100% - 100px);
+			display: block;
+			font-size: 12px;
+			left: 10px;
+			padding: 10px;
+			position: absolute;
+			text-align: justify;
+			top: 10px;
+			z-index: 10;
+			-webkit-transition: left 0.5s, -webkit-transform 2s;
+			transition: left 0.5s, transform 2s;
+			clear: both;
+		}
+		#feedbackTxt{
+
+			overflow-y: auto;  
+			min-height: 10px;
+			max-height: 350px;
+			background-color: #ffffff;
+			width: 374px;
+			display: block;
+			font-size: 12px;		
+			position: absolute;
+			text-align: justify;
+			top:237px;
+			left:0px;
+			z-index: 10;
+		}
+		#mydiv {  
+    display: none;
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	z-index: 9999;
+	background: url(loading.gif) center no-repeat #0c0c0c52;
+ }
+
+.ajax-loader {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -32px; /* -1 * image width / 2 */
+    margin-top: -32px;  /* -1 * image height / 2 */
+    display: block;     
+}
+
+#feedbackTxt .card-body {
+	color: black;
+}
+	</style>
+</head>
+
+<body>
+		
+	<div class="ctrl-panel">
+		<div class="form-horizontal">
+			<div class="form-group row">
+				<div class="col-sm-12">
+					<input required  type='text' id='start' class='form-control ' value='' placeholder="Source"
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();">
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-sm-12">
+					<input type='text' id='dest' class='form-control' size='40' value='' required placeholder="Destination"
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();" />
+				</div>
+			</div>
+			<div class="form-group" style="display: none;">
+				<div class="checkbox">
+					<label><input type="checkbox" id="chkEnableDTFiltering" name="chkEnableDTFiltering"
+							onclick="handleDateTimeFilteringClicked()">Enable datetime filtering</label>
+				</div>
+			</div>
+		</div>
+		<div class="form-horizontal">
+				<div class="form-group row">
+					<div class="col-sm-12">
+							<select id="vehicles" class="form-control" 
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();" required onchange="
+					(true)">
+						<!--option value="1">Motorcycle</option-->
+						<option value="2" selected="true">Car</option>
+						<option value="3">Truck</option>
+						<option value="9">Delivery Truck</option>
+						<!--option value="4">Motor Home</option>
+					<option value="5">Minibus</option>
+					<option value="6">Bus</option>
+					<option value="7">Motorcycle Sidecar</option>
+					<option value="8">Tricycle</option>
+					<option value="10">Snowmobile</option>
+					<option value="11">Pick-Up</option>
+					<option value="12">Tractor</option
+					<option value="13">Taxi</option>
+					<option value="14">HCM/EME</option>-->
+					</select>
+					</div>
+					<div class="col-smsdsds-6">
+							<input type='hidden' id='nrOfTotalTires' class="form-control" required  value='4'
+							onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+							onchange="setUserdefinedVehicleSpec(true)" />
+					</div>
+				</div>
+			</div>
+	
+		<div class="form-horizontal">
+			<div class="form-group row">
+				<div class="col-sm-12">
+				
+						<select id="currency" class="form-control" 
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();" required onchange="
+					(true)">
+					<option value="USD" selected="true">USD</option>
+					<option value="INR">INR</option>
+					<option value="EUR">EUR</option>
+					<option value="CNY">CNY</option>
+				</select>
+				</div>
+			</div>
+		</div>
+		
+		
+		<table style="display: none" border="0" class="form-group">
+			<tr style="display: none">
+				<td style="font-weight: bold;">Route Alternatives:</td>
+				<td colspan="3">
+						<select id="routeAlternatives" class="form-control" style="width:312px;"
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();">
+						<option value="0">0</option>
+						<option value="1">1</option>
+						<option value="2" selected="true">2</option>
+					</select>
+				</td>
+			</tr>
+			
+			<tr style="display:none">
+				<td>Trailer Type</td>
+				<td>
+					<select id="trailerType" class="form-control" style="width:89px;"
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)">
+						<option value="0" selected="true">None</option>
+						<option value="1">Caravan</option>
+						<option value="2">Trailer</option>
+					</select>
+				</td>
+				<td>Trailer Number</td>
+				<td>
+					<select id="trailerNr" class="form-control" style="width:89px;"
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)">
+						<option value="0" selected="true">0</option>
+						<option value="1">1</option>
+						<option value="2">2</option>
+						<option value="3">3 or more</option>
+					</select>
+				</td>
+			</tr>
+			<tr style="display:none">
+				<td>Vehicle Number Of Axles</td>
+				<td><input type='text' id='nrOfAxlesVehicle' class="form-control" style="width:85px;" value='2'
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)" /></td>
+				<td>Trailer Number Of Axles</td>
+				<td><input type='text' id='nrOfAxlesTrailer' class="form-control" style="width:85px;" value='0'
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)" /></td>
+			</tr>
+			<tr style="display:none">
+				<td>Hybrid</td>
+				<td>
+					<select id="hybrid" class="form-control" style="width:89px;"
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)">
+						<option value="0" selected="true">No Hybrid</option>
+						<option value="1">Hybrid</option>
+					</select>
+				</td>
+				<td>Emission Type</td>
+				<td>
+					<select id="emissionType" class="form-control" style="width:89px;"
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)">
+						<option value="1">EURO I</option>
+						<option value="2">EURO II</option>
+						<option value="3">EURO III</option>
+						<option value="4">EURO IV</option>
+						<option value="5" selected="true">EURO V</option>
+						<option value="6">EURO VI</option>
+						<option value="7">EURO EEV</option>
+						<option value="8">Electric Vehicle</option>
+					</select>
+				</td>
+			</tr>
+			<tr style="display:none">
+				<td>Vehicle Height</td>
+				<td><input type='text' id='vehHeight' class="form-control" style="width:85px;" value='167'
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)" /></td>
+				<td>Trailer Height</td>
+				<td><input type='text' id='trailerHeight' class="form-control" style="width:85px;" value='0'
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)" /></td>
+			</tr>
+			<tr style="display:none">
+				<td>Vehicle Weight</td>
+				<td><input type='text' id='vehWeight' class="form-control" style="width:85px;" value='1739'
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)" /></td>
+				<td>Total Weight</td>
+				<td><input type='text' id='totalWeight' class="form-control" style="width:85px;" value='1739'
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)" /></td>
+			</tr>
+			<tr style="display:none">
+				<td>Total Width</td>
+				<td><input type='text' id='totalWidth' class="form-control" style="width:85px;" value='180'
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)" /></td>
+				<td>Total Length</td>
+				<td><input type='text' id='totalLength' class="form-control" style="width:85px;" value='441'
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)" /></td>
+			</tr>
+			<tr style="display:none">
+				<td>Disabled Equipped</td>
+				<td>
+					<select id="disabledEquipped" class="form-control" style="width:89px;"
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)">
+						<option value="0" selected="true">No</option>
+						<option value="1">Yes</option>
+					</select>
+				</td>
+				<td>Min Pollution</td>
+				<td>
+					<select id="minPollution" class="form-control" style="width:89px;"
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)">
+						<option value="0" selected="true">No</option>
+						<option value="1">Yes</option>
+					</select>
+				</td>
+			</tr>
+			<tr style="display:none">
+				<td>HOV</td>
+				<td>
+					<select id="hov" class="form-control" style="width:89px;"
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)">
+						<option value="0" selected="true">No</option>
+						<option value="1">Yes</option>
+					</select>
+				</td>
+				<td>Number Passengers</td>
+				<td><input type='text' id='nrPassengers' class="form-control" style="width:85px;" value='2'
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)" /></td>
+			</tr>
+			<tr style="display:none">
+				<td>Commercial</td>
+				<td>
+					<select id="commercial" class="form-control" style="width:89px;"
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)">
+						<option value="0" selected="true">No</option>
+						<option value="1">Yes</option>
+					</select>
+				</td>
+				<td>Hazardous Type</td>
+				<td>
+					<select id="hazardousType" class="form-control" style="width:89px;"
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)">
+						<option value="0" selected="true">None</option>
+						<option value="1">Explosives</option>
+						<option value="2">Any Hazardous Material</option>
+					</select>
+				</td>
+			</tr>
+			<tr style="display:none">
+				<td>Height above 1st axle</td>
+				<td>
+					<input type='text' id='heightAbove1stAxle' class="form-control" style="width:85px;" value='100'
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)" />
+				</td>
+				<td>Fuel Type</td>
+				<td>
+					<select id="fuelType" class="form-control" style="width:89px;"
+						onkeydown="if (event.keyCode == 13)startRouteCalculation();"
+						onchange="setUserdefinedVehicleSpec(true)">
+						<option value="petrol" selected="true">Petrol</option>
+						<option value="diesel">Diesel</option>
+						<option value="lng">LNG</option>
+						<option value="lpg">LPG</option>
+						<option value="cng">CNG</option>
+						<option value="ethanol">Ethanol</option>
+						<option value="propane">Propane</option>
+						<option value="hydrogen">Hydrogen</option>
+						<option value="electric">Electric</option>
+					</select>
+				</td>
+			</tr>
+		</table>
+		<div class="form-horizontal">
+			<div class="form-group" style="text-align: center">
+				<div class="col-sm-9">
+					<input type="submit" id="routeButton2" class="btn btn-primary" value="submit" />
+					<input type='hidden' hidden id='serverURL' class="form-control" style="width:230px;"
+					value='https://tce.cit.api.here.com'
+					onkeydown="if (event.keyCode == 13)startRouteCalculation();" />
+		
+				</div>
+			</div>
+		</div>
+	
+	
+		
+		
+	<div id="feedbackTxt"></div>
+</div>
+<div id="infoBox">
+		<div class="card card text-white bg-dark mb-3" style="width: 18rem;">
+				<div class="card-body">
+				  <h5 class="card-title">Routes & Toll Gates</h5>
+				  <!--<h6 class="card-subtitle mb-2 text-muted">This application will help us to calculate the toll gate cost for the available routes</h6>-->
+				  <p class="card-text">This application will help us to calculate the toll gate cost for the available routes.</p>
+<p class="card-text">Fill in the source, destination and finally click on the submit button to view the details.</p>
+<p class="card-text">You find all the route options with matching colors and a list of toll gates in each route along with the cost</p>
+				  <h6 class="card-subtitle mb-2 text-muted">Specifications</h6>
+				  <ul>
+					  <li>JavaScript SDK : v3.1</li>
+				  </ul>
+				  <p class="card-text">For the more information, Please go through the below tutorial.</p>
+				  <a href="#" class="card-link">developer.here.com/tutorials</a>
+				</div>
+			  </div>
+</div>
+<div id="mydiv">
+		
+	
+	</div>
+	<div id="mapContainer" class=""></div>
+	<!-- Optional JavaScript -->
+	<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+	<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+		integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+		crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+		crossorigin="anonymous"></script>
+
+	<script src="mainHome.js" type="text/javascript"></script>
+
+	</div>
+	<footer>
+</body>
+
+</html>
